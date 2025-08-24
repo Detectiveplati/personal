@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% block content %}
+<h3>{{ supplier.name }} — {{ 'Edit Item' if item else 'New Item' }}</h3>
+
+<form method="post" class="grid card" style="max-width:520px">
+  <label>Name <input name="name" value="{{ item.name if item else '' }}" required></label>
+  <label>Unit <input name="unit" value="{{ item.unit if item else '' }}" required placeholder="kg / pkt / carton / tin"></label>
+  <label>Default Qty <input type="number" name="default_qty" min="1" value="{{ item.default_qty if item else 1 }}" required></label>
+  <label>Type <input name="item_type" value="{{ item.item_type if item else '' }}" placeholder="Dry / Frozen / Vegetables"></label>
+  {% if item %}
+    <label><input type="checkbox" name="active" {% if item.active %}checked{% endif %}> Active</label>
+  {% endif %}
+  <div class="row">
+    <button type="submit">{{ 'Save' if item else 'Create' }}</button>
+    <a href="/suppliers/{{ supplier.id }}/items">Cancel</a>
+  </div>
+</form>
+{% endblock %}

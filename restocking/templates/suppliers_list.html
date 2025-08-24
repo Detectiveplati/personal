@@ -1,0 +1,29 @@
+{% extends "base.html" %}{% block content %}
+<div class="card grid">
+  <form method="get" class="row">
+    <input name="q" value="{{ q or '' }}" placeholder="Search suppliers..." />
+    <button>Search</button>
+  </form>
+  <form method="post" action="/suppliers/new" class="row">
+    <input name="name" placeholder="New supplier name" required>
+    <input name="phone" placeholder="WhatsApp phone (e.g. 6588xxxxxx)">
+    <input name="category" placeholder="Category (Dry/Frozen/Vegetables)">
+    <button type="submit">Add Supplier</button>
+  </form>
+</div>
+
+<h3>Suppliers</h3>
+<div class="grid">
+  {% for s in suppliers %}
+    <div class="card row">
+      <div style="flex:1">
+        <div><strong>{{ s.name }}</strong> — {{ s.category or 'Uncategorized' }}</div>
+        {% if s.phone %}<div>📞 {{ s.phone }}</div>{% endif %}
+      </div>
+      <a href="/suppliers/{{ s.id }}/items">Items →</a>
+    </div>
+  {% else %}
+    <div>No suppliers yet.</div>
+  {% endfor %}
+</div>
+{% endblock %}

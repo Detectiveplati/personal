@@ -1,0 +1,24 @@
+{% extends "base.html" %}{% block content %}
+<h3>{{ supplier.name }} — Items</h3>
+<div class="row">
+  <a href="/suppliers/{{ supplier.id }}/items/new">+ Add Item</a>
+</div>
+<div class="grid">
+  {% for it in items %}
+    <div class="card row">
+      <div style="flex:1">
+        <div><strong>{{ it.name }}</strong> ({{ it.unit }}) • default: {{ it.default_qty }}</div>
+        {% if it.item_type %}<div>Type: {{ it.item_type }}</div>{% endif %}
+      </div>
+      <a href="/items/{{ it.id }}/edit">Edit</a>
+    </div>
+    <div class="row" style="margin: 8px 0;">
+      <a href="/suppliers/{{ supplier.id }}/order">🛒 Start Order</a>
+    </div>
+  {% else %}
+    <div class="card">No items yet. Add your first one.</div>
+
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,4 @@
+# in your venv with the packages you listed
+export FLASK_APP=app:app
+flask init-db
+flask run

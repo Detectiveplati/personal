@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}Restocking{% endblock %}</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="container">
+  <header class="site-header" data-header>
+    <div class="brand"><a href="{{ url_for('suppliers_list') }}" style="text-decoration:none;color:inherit;">Restocking</a></div>
+    <nav class="nav" data-nav>
+      <a href="{{ url_for('suppliers_list') }}">Suppliers</a>
+      <a href="{{ url_for('items_list') }}">Items</a>
+      <a href="{{ url_for('orders_list') }}">Orders</a>
+    </nav>
+  </header>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="grid">
+        {% for cat,msg in messages %}
+          <div class="flash {% if cat=='error' %}error{% endif %}">{{ msg }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <main class="section">
+    {% block content %}{% endblock %}
+  </main>
+</div>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

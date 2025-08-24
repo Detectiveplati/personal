@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h3>🛒 New Order — {{ supplier.name }}</h3>
+
+<form method="post" action="{{ url_for('order_preview', supplier_id=supplier.id) }}" class="card" style="max-width:800px">
+
+  <div class="grid" style="margin-bottom:12px">
+    <label>Outlet Name
+      <input name="outlet_name" value="Sari Rasa (East Village)" required>
+    </label>
+    <label>Notes (optional)
+      <input name="notes" placeholder="e.g. Deliver before 10am; use back door lift">
+    </label>
+  </div>
+
+  <h4>Items</h4>
+  <div class="grid" style="gap:8px">
+    {% for it in items %}
+      <div class="row card" style="align-items:center">
+        <div style="flex:1">
+          <strong>{{ it.name }}</strong> ({{ it.unit }})
+          {% if it.item_type %}
+            <small>• {{ it.item_type }}</small>
+          {% endif %}
+        </div>
+        <div class="row" style="gap:4px">
+          <button type="button" onclick="
+            const qty=document.getElementById('qty_{{it.id}}');
+            qty.value = Math.max(0, parseInt(qty.value||'0')-1);
+          ">-</button>
+          <input id="qty_{{it.id}}" name="qty_{{it.id}}" type="number" min="0"
+                 value="{{ it.default_qty }}" style="width:70px;text-align:center">
+          <button type="button" onclick="
+            const qty=document.getElementById('qty_{{it.id}}');
+            qty.value = (parseInt(qty.value||'0')+1);
+          ">+</button>
+        </div>
+      </div>
+    {% else %}
+      <div class="card">No items yet. Add some items first.</div>
+    {% endfor %}
+  </div>
+
+  <div class="row" style="justify-content:flex-end; margin-top:16px; gap:8px">
+    <a href="{{ url_for('supplier_items', supplier_id=supplier.id) }}">Cancel</a>
+    <button type="submit">Preview WhatsApp</button>
+  </div>
+</form>
+
+{% endblock %}

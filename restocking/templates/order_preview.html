@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h3>👀 Order Preview — {{ supplier.name }}</h3>
+
+<div class="card" style="max-width:800px">
+  <div class="grid">
+    <div><strong>Outlet:</strong> {{ outlet_name }}</div>
+    {% if supplier.phone %}
+      <div><strong>To:</strong> +{{ supplier.phone }} (WhatsApp)</div>
+    {% endif %}
+    {% if notes %}
+      <div><strong>Notes:</strong> {{ notes }}</div>
+    {% endif %}
+  </div>
+
+  <h4 style="margin-top:12px">Items</h4>
+  <div class="grid">
+    {% for it in items %}
+      <div class="row" style="justify-content:space-between">
+        <div>{{ it.name }}</div>
+        <div>{{ it.qty }} {{ it.unit }}</div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <h4 style="margin-top:12px">Message (read-only)</h4>
+  <pre id="wa-msg" style="white-space:pre-wrap; border:1px solid #ddd; border-radius:8px; padding:10px; background:#fafafa">{{ text }}</pre>
+
+  <div class="row" style="gap:8px; margin-top:12px">
+    <a href="{{ url_for('order_form', supplier_id=supplier.id) }}">Back</a>
+
+    <a href="{{ wa_url }}" target="_blank" rel="noopener">
+      <button type="button">📲 Send via WhatsApp</button>
+    </a>
+
+    <button type="button" onclick="
+      const el = document.getElementById('wa-msg');
+      const rng = document.createRange();
+      rng.selectNodeContents(el);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(rng);
+      try { document.execCommand('copy'); } catch(e) {}
+      sel.removeAllRanges();
+      this.textContent='✅ Copied';
+      setTimeout(()=>this.textContent='Copy Message', 1500);
+    ">Copy Message</button>
+  </div>
+</div>
+
+{% endblock %}
