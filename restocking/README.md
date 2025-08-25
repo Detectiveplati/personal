@@ -28,7 +28,7 @@ Result: **fast, consistent, mistake-free ordering**.
 - [ ] **Customisable Stock Items**  
   Add/edit items linked to each supplier with units (kg, carton, packet, etc.).
 
-- [] **Order Checklist Flow (Alpha)**  
+- [ ] **Order Checklist Flow (Alpha)**  
   - Choose supplier  
   - Adjust item quantities via `+ / -` buttons  
   - Preview order  
@@ -69,16 +69,23 @@ Result: **fast, consistent, mistake-free ordering**.
 ## 🖥️ Technical Plan
 
 ### Tech Stack
-- **Frontend:** React (Next.js or Vite) + Tailwind CSS  
-- **Data Storage (MVP):** Local IndexedDB (via Dexie.js)  
-- **Cross-Platform:** Mobile-first PWA, with optional Capacitor build for Android APK  
-- **Integrations:** WhatsApp deep link (`https://wa.me/`)  
+- **Backend:** Flask (Python) — handles routes, form submissions, WhatsApp link generation  
+- **Database:** SQLAlchemy ORM + SQLite (dev) / Postgres (production-ready)  
+- **Frontend:** Server-rendered HTML templates (Jinja2) with CSS + vanilla JS for interactivity (`+ / -` qty buttons, dynamic updates)  
+- **Cross-Platform:** Mobile-friendly responsive design, accessible via browser (installable as a web app via “Add to Home Screen”)  
+- **Integrations:** WhatsApp deep link (`https://wa.me/`) for one-click sending of orders
+
+---
 
 ### Data Model
-- **Suppliers** → name, phone, category, notes  
-- **Items** → linked to supplier, type, unit, default qty  
-- **Orders** → supplier, items, timestamp, notes  
-- **Order Lines** → item snapshot, qty, unit  
+- **Suppliers**  
+  - `id`, `name`, `phone`, `category`, `notes`  
+- **Items**  
+  - `id`, `supplier_id` (FK), `name`, `unit`, `default_qty`, `type`, `active`  
+- **Orders** *(MVP+)*  
+  - `id`, `supplier_id` (FK), `outlet_name`, `notes`, `timestamp`  
+- **Order Lines** *(MVP+)*  
+  - `id`, `order_id` (FK), `item_name_snapshot`, `qty`, `unit`  
 
 ---
 
