@@ -1,51 +1,98 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h3>🛒 New Order — {{ supplier.name }}</h3>
+<h3>🛒 Order Form for {{ supplier.name }}</h3>
 
-<form method="post" action="{{ url_for('order_preview', supplier_id=supplier.id) }}" class="card" style="max-width:800px">
+<form method="post" action="{{ url_for('order_preview', supplier_id=supplier.id) }}" class="card grid"
+  style="max-width:400px;">
 
-  <div class="grid" style="margin-bottom:12px">
-    <label>Outlet Name
-      <input name="outlet_name" value="Sari Rasa (East Village)" required>
+  <div class="grid" style="margin-bottom:12px;">
+    {% if outlets and outlets[0] %}
+    <label class="form-label">
+      <span>Outlet Name</span>
+      <input name="outlet_name" value="{{ outlets[0].name }}" readonly class="input-wide" style="background:#f4f4f6;">
     </label>
-    <label>Notes (optional)
-      <input name="notes" placeholder="e.g. Deliver before 10am; use back door lift">
+    <label class="form-label">
+      <span>Address</span>
+      <input name="address" value="{{ outlets[0].address }}" readonly class="input-wide" style="background:#f4f4f6;">
+    </label>
+    <label class="form-label">
+      <span>Notes (optional)</span>
+      <input name="notes" value="{{ outlets[0].notes }}" placeholder="e.g. Deliver before 10am; use back door lift"
+        class="input-wide">
+    </label>
+    {% else %}
+    <div class="card" style="margin-bottom:12px; color:var(--muted);">No outlet details found. Please set up your outlet
+      first.</div>
+    {% endif %}
+    <label class="form-label">
+      <span>Date of Delivery</span>
+      <input type="date" name="delivery_date" class="input-wide"
+        value="{{ (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%d') }}">
     </label>
   </div>
 
   <h4>Items</h4>
-  <div class="grid" style="gap:8px">
+  <div class="grid" style="gap:8px;">
     {% for it in items %}
-      <div class="row card" style="align-items:center">
-        <div style="flex:1">
-          <strong>{{ it.name }}</strong> ({{ it.unit }})
-          {% if it.item_type %}
-            <small>• {{ it.item_type }}</small>
-          {% endif %}
-        </div>
-        <div class="row" style="gap:4px">
-          <button type="button" onclick="
-            const qty=document.getElementById('qty_{{it.id}}');
-            qty.value = Math.max(0, parseInt(qty.value||'0')-1);
-          ">-</button>
-          <input id="qty_{{it.id}}" name="qty_{{it.id}}" type="number" min="0"
-                 value="{{ it.default_qty }}" style="width:70px;text-align:center">
-          <button type="button" onclick="
-            const qty=document.getElementById('qty_{{it.id}}');
-            qty.value = (parseInt(qty.value||'0')+1);
-          ">+</button>
-        </div>
+    <div class="row card" style="align-items:center;">
+      <div style="flex:1;">
+        <strong>{{ it.name }}</strong>
+        {% if it.item_type %}
+        <small>• {{ it.item_type }}</small>
+        {% endif %}
+        {# Do NOT show default_qty here #}
       </div>
+      <div class="row" style="gap:2px;">
+        <button type="button" class="btn-xsmall" aria-label="Decrease quantity" onclick="
+            const qty=document.getElementById('qty_{{it.id}}');
+            let step = parseFloat('{{ it.default_qty }}');
+            let val = parseFloat(qty.value || '0');
+            let newVal = Math.max(0, (Math.round((val - step) * 100) / 100));
+            qty.value = newVal.toFixed(2);
+          ">−</button>
+        <input id="qty_{{it.id}}" name="qty_{{it.id}}" type="number" min="0" value="0.00" step="{{ it.default_qty }}"
+          class="qty-input">
+        <button type="button" class="btn-xsmall" aria-label="Increase quantity" onclick="
+            const qty=document.getElementById('qty_{{it.id}}');
+            let step = parseFloat('{{ it.default_qty }}');
+            let val = parseFloat(qty.value || '0');
+            let newVal = Math.round((val + step) * 100) / 100;
+            qty.value = newVal.toFixed(2);
+          ">+</button>
+        <span style="margin-left:6px; color:var(--muted); font-size:14px;">{{ it.unit }}</span>
+      </div>
+    </div>
     {% else %}
-      <div class="card">No items yet. Add some items first.</div>
+    <div class="card">No items yet. Add some items first.</div>
     {% endfor %}
   </div>
 
-  <div class="row" style="justify-content:flex-end; margin-top:16px; gap:8px">
-    <a href="{{ url_for('supplier_items', supplier_id=supplier.id) }}">Cancel</a>
-    <button type="submit">Preview WhatsApp</button>
+  <div class="row" style="justify-content:flex-end; margin-top:16px; gap:8px;">
+    <button type="submit" class="btn primary">Preview WhatsApp</button>
+    <a href="{{ url_for('supplier_items', supplier_id=supplier.id) }}" class="btn btn-small btn-delete">Cancel</a>
+    
   </div>
 </form>
 
 {% endblock %}
+
+{% macro script() %}
+<script>
+  // This script block will be used to process the form data on submission
+  document.querySelector('form').onsubmit = function () {
+    const selectedItems = [];
+    {% for it in items %}
+    const qtyElement = document.getElementById('qty_{{it.id}}');
+    const qtyValue = parseFloat(qtyElement.value);
+    if (qtyValue > 0) {
+      selectedItems.push({ id: {{ it.id }}, qty: qtyValue
+  });
+      }
+  {% endfor %}
+
+  // Now you can use the selectedItems array to process the order
+  console.log(selectedItems);
+  };
+</script>
+{% endmacro %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+{% set back_url = url_for('suppliers_list') %}
+<div class="card" style="margin-top: 32px; padding: 18px;">
+  <h3 style="margin-top:0;">Add Supplier</h3>
+  <form method="post" action="/suppliers/new" class="grid" style="gap: 12px;">
+    <input name="name" placeholder="New supplier name" required>
+    <input name="phone" placeholder="WhatsApp phone (e.g. 6588xxxxxx)">
+    <input name="category" placeholder="Stock Category (e.g. Veg, Dairy...)">
+    <button type="submit" class="btn primary">Add Supplier</button>
+  </form>
+</div>
+{% endblock %}

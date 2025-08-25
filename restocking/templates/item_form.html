@@ -1,17 +1,39 @@
-{% extends "base.html" %}{% block content %}
-<h3>{{ supplier.name }} — {{ 'Edit Item' if item else 'New Item' }}</h3>
-
-<form method="post" class="grid card" style="max-width:520px">
-  <label>Name <input name="name" value="{{ item.name if item else '' }}" required></label>
-  <label>Unit <input name="unit" value="{{ item.unit if item else '' }}" required placeholder="kg / pkt / carton / tin"></label>
-  <label>Default Qty <input type="number" name="default_qty" min="1" value="{{ item.default_qty if item else 1 }}" required></label>
-  <label>Type <input name="item_type" value="{{ item.item_type if item else '' }}" placeholder="Dry / Frozen / Vegetables"></label>
-  {% if item %}
-    <label><input type="checkbox" name="active" {% if item.active %}checked{% endif %}> Active</label>
-  {% endif %}
-  <div class="row">
-    <button type="submit">{{ 'Save' if item else 'Create' }}</button>
-    <a href="/suppliers/{{ supplier.id }}/items">Cancel</a>
-  </div>
-</form>
+{% extends "base.html" %}
+{% block content %}
+{% set back_url = url_for('supplier_items', supplier_id=supplier.id) %}
+<div class="card" style="max-width:400px; margin:auto; padding:18px;">
+  <h3 style="margin-top:0;">
+    {% if item %}Edit Item{% else %}Add Item{% endif %}
+  </h3>
+  <form method="post" class="grid" style="gap: 12px;">
+    <label class="form-label">
+      <span>Item Name</span>
+      <input name="name" required class="input-wide" placeholder="e.g. Tomatoes"
+        value="{{ item.name if item else '' }}">
+    </label>
+    <label class="form-label">
+      <span>Unit</span>
+      <input name="unit" required class="input-wide" placeholder="e.g. kg, box" value="{{ item.unit if item else '' }}">
+    </label>
+    <label class="form-label">
+      <span>Default Quantity</span>
+      <input name="default_qty" type="number" step="0.01" min="0" required class="input-wide" placeholder="e.g. 1.00"
+        value="{{ item.default_qty if item else '' }}">
+    </label>
+    <label class="form-label">
+      <span>Type</span>
+      <input name="item_type" class="input-wide" placeholder="e.g. Vegetable, Dairy"
+        value="{{ item.item_type if item else '' }}">
+    </label>
+    <button type="submit" class="btn primary" style="font-size:1rem;">{% if item %}Save{% else %}Add Item{% endif %}</button>
+    <div class="row" style="justify-content:flex-end; gap:8px; margin-top:12px;">
+      <a href="{{ back_url }}" class="btn" style="font-size:1rem;">← Back</a>
+      {% if item %}
+      <form method="post" action="{{ url_for('item_delete', item_id=item.id) }}" style="display:inline;">
+        <button type="submit" class="btn btn-delete" style="font-size:1rem;" onclick="return confirm('Delete this item?')">Delete</button>
+      </form>
+      {% endif %}
+    </div>
+  </form>
+</div>
 {% endblock %}

@@ -1,24 +1,30 @@
-{% extends "base.html" %}{% block content %}
-<h3>{{ supplier.name }} — Items</h3>
+{% extends "base.html" %}
+{% block content %}
+<h3> Item List </h3>
+<p>{{ supplier.name }}</p>
 <div class="row">
-  <a href="/suppliers/{{ supplier.id }}/items/new">+ Add Item</a>
+  <a href="/suppliers/{{ supplier.id }}/items/new" class="btn btn-add-item">+ Add Item</a>
 </div>
 <div class="grid">
   {% for it in items %}
-    <div class="card row">
-      <div style="flex:1">
-        <div><strong>{{ it.name }}</strong> ({{ it.unit }}) • default: {{ it.default_qty }}</div>
-        {% if it.item_type %}<div>Type: {{ it.item_type }}</div>{% endif %}
-      </div>
-      <a href="/items/{{ it.id }}/edit">Edit</a>
+  <div class="card row">
+    <div style="flex:1">
+      <div><strong>{{ it.name }}</strong> ({{ it.unit }}) • default: {{ it.default_qty }}</div>
+      {% if it.item_type %}<div>Type: {{ it.item_type }}</div>{% endif %}
     </div>
-    <div class="row" style="margin: 8px 0;">
-      <a href="/suppliers/{{ supplier.id }}/order">🛒 Start Order</a>
-    </div>
+    <a href="/items/{{ it.id }}/edit">Edit</a>
+  </div>
   {% else %}
-    <div class="card">No items yet. Add your first one.</div>
-
-    </div>
+  <div class="card">No items yet. Add your first one.</div>
   {% endfor %}
 </div>
+<div class="row" style="margin: 8px 0;">
+  <a href="/suppliers/{{ supplier.id }}/order" class="btn primary" style="color:#fff;">🛒 Start Order</a>
+</div>
+<div class="row" style="margin-bottom: 16px;">
+  <a href="{{ url_for('suppliers_list') }}" class="btn" style="margin-left:0;">
+    ← Back
+  </a>
+</div>
+{% set back_url = url_for('suppliers_list') %}
 {% endblock %}

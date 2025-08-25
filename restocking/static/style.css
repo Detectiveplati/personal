@@ -1,0 +1,786 @@
+/* =========================
+   Base + Tokens
+   ========================= */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font: var(--fs)/1.55 var(--font);
+  color: var(--text);
+  background: var(--bg);
+  padding: 0;
+}
+
+:root {
+  --bg: #f4f8ff;           /* Pastel blue background */
+  --card: #eaf2fb;         /* Lighter pastel blue for cards */
+  --text: #1e293b;         /* Strong dark blue for text */
+  --muted: #64748b;        /* Muted blue-gray */
+  --brand: #90cdf4;        /* Pastel blue for buttons */
+  --brand-600: #60a5fa;    /* Stronger blue for hover */
+  --accent: #90cdf4;       /* Accent pastel blue */
+  --accent-600: #60a5fa;
+  --border: #b6d0ea;       /* Soft blue border */
+  --ring: rgba(96, 165, 250, .18); /* Blue ring for focus */
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, .04);
+  --shadow: 0 2px 8px rgba(16, 24, 40, .06);
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
+
+  /* Type scale */
+  --font: "Inter", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs: 15px;
+  --fs-md: 16px;
+  --fs-lg: 18px;
+  --fs-xl: 22px;
+
+  /* Spacing */
+  --sp-1: 6px;
+  --sp-2: 10px;
+  --sp-3: 12px;
+  --sp-4: 14px;
+  --sp-5: 16px;
+  --sp-6: 20px;
+  --sp-8: 24px;
+}
+
+body {
+  padding: var(--sp-6);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 24px 18px;                   /* More horizontal padding */
+  box-sizing: border-box;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+}
+
+/* =========================
+   Accessibility helpers
+   ========================= */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.skip-link:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: var(--sp-2) var(--sp-4);
+  background: var(--brand);
+  color: white;
+  border-radius: var(--radius-sm);
+}
+
+/* =========================
+   Header (JS-enhanced)
+   ========================= */
+.site-header {
+  position: sticky;
+  top: 8px;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--sp-3);
+  align-items: center;
+
+  margin-bottom: var(--sp-5);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition: background .2s ease, border-color .2s ease, box-shadow .2s ease, transform .08s ease;
+}
+
+.site-header.scrolled {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 28px rgba(16, 24, 40, .10);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.brand a {
+  font-weight: 800;
+  font-size: 1.7rem;
+  letter-spacing: 1px;
+  padding: 10px 20px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(90deg, var(--brand), var(--accent) 80%);
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 8px rgba(96,165,250,0.12);
+  box-shadow: 0 1px 8px rgba(96,165,250,0.08);
+  transition: background 0.2s, color 0.2s;
+  display: inline-block;
+}
+
+.brand a:hover,
+.brand a:focus {
+  background: linear-gradient(90deg, var(--accent-600), var(--brand-600) 80%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  text-shadow: 0 4px 16px rgba(96,165,250,0.18);
+}
+
+.nav {
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.nav a {
+  text-decoration: none;
+  color: var(--text);
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  transition: background .15s ease, color .15s ease;
+}
+
+.nav a:hover,
+.nav a.is-active {
+  background: rgba(14, 165, 163, .12);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.search {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+.search input[type="search"] {
+  width: 220px;
+}
+
+/* =========================
+   Forms
+   ========================= */
+label {
+  font-weight: 600;
+  font-size: var(--fs-sm);
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  font-size: var(--fs);
+  margin-top: 6px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+/* Inputs—gentle states */
+input[readonly],
+select[disabled],
+textarea[disabled] {
+  background: #f8fafb;
+  color: var(--muted);
+}
+
+/* Form grid helpers */
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+@media (min-width: 640px) {
+  .form-row.cols-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .form-row.cols-3 {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+.form-label {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.form-label > span {
+  font-size: 1.08em;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+  letter-spacing: 0.2px;
+  line-height: 1.2;
+  /* Ensures it fits in one line */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* =========================
+   Buttons
+   ========================= */
+/* Main button styles for Slate theme */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--brand);
+  background: linear-gradient(90deg, var(--brand) 70%, var(--accent) 100%);
+  color: #1e293b; /* Strong blue text */
+  text-decoration: none;
+  cursor: pointer;
+  font-weight: 700; /* Strong/bold words */
+  box-shadow: 0 2px 8px rgba(96,165,250,0.08);
+  transition: background .15s, border-color .15s, box-shadow .15s;
+}
+
+.btn:hover,
+.btn:focus {
+  background: linear-gradient(90deg, var(--brand-600) 70%, var(--accent-600) 100%);
+  border-color: var(--accent-600);
+  box-shadow: 0 4px 16px rgba(99,102,241,0.12);
+}
+
+.btn.primary {
+  background: linear-gradient(90deg, var(--accent) 60%, var(--brand) 100%);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* Small button */
+.btn-small {
+  padding: 4px 10px;
+  font-size: 0.85em;
+  border-radius: var(--radius-sm);
+}
+
+/* Extra small button */
+.btn-xsmall {
+  padding: 2px 8px;
+  font-size: 0.78em;
+  border-radius: var(--radius-sm);
+  min-width: 32px;
+  max-width: 40px;
+  height: 28px;
+  line-height: 1.2;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+}
+
+/* Neutral color for Edit */
+.btn-edit {
+  background: #f1f5f9;
+  color: var(--muted);
+  border-color: #cbd5e1;
+}
+
+.btn-edit:hover,
+.btn-edit:focus {
+  background: #e2e8f0;
+  color: var(--brand);
+}
+
+/* Red color for Delete */
+.btn-delete {
+  background: #ef4444;
+  color: #fff;
+  border-color: #ef4444;
+}
+
+.btn-delete:hover,
+.btn-delete:focus {
+  background: #b91c1c;
+  color: #fff;
+}
+
+/* Quantity buttons: use accent for active */
+.qty-btn {
+  width: 22px;
+  height: 22px;
+  font-size: 1em;
+  font-weight: bold;
+  border-radius: 50%;
+  border: 1px solid var(--brand);
+  background: var(--card);
+  color: var(--brand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 2px;
+  padding: 0;
+  min-width: 0;
+  min-height: 0;
+}
+
+.qty-btn:active,
+.qty-btn:focus {
+  background: var(--brand);
+  color: #fff;
+  border-color: var(--brand-600);
+}
+
+.qty-input {
+  width: 48px;
+  text-align: center;
+  padding: 6px 4px;
+  font-size: 1em;
+  margin: 0 2px;
+}
+
+/* =========================
+   Cards & Sections
+   ========================= */
+.section {
+  display: grid;
+  gap: var(--sp-4);
+}
+
+.card {
+  background: var(--card);
+  border: 2px solid var(--border);      /* Thicker border */
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 20px 18px;                   /* More horizontal padding */
+  overflow-wrap: break-word;            /* Prevent word spill */
+  word-break: break-word;
+  box-sizing: border-box;
+}
+
+/* =========================
+   Alerts / Flash messages
+   ========================= */
+.alerts {
+  display: grid;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-4);
+}
+
+.alert {
+  display: grid;
+  grid-template-columns: 10px 1fr;
+  gap: var(--sp-3);
+  align-items: start;
+  border: 1px solid var(--border);
+  background: #f6fbfb;
+  border-radius: var(--radius-sm);
+  padding: var(--sp-3) var(--sp-4);
+  box-shadow: var(--shadow-sm);
+}
+
+.alert-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--brand);
+  margin-top: 4px;
+}
+
+.alert.is-error {
+  background: #fff4f4;
+}
+
+.alert.is-error .alert-dot {
+  background: #ef4444;
+}
+
+.alert .alert-text {
+  font-size: var(--fs-md);
+}
+
+/* =========================
+   Tables
+   ========================= */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+
+.table th,
+.table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.table th {
+  text-align: left;
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  color: var(--muted);
+  letter-spacing: .6px;
+}
+
+.table tr:hover td {
+  background: #f6fbfb;
+}
+
+/* Table utilities */
+.cell-right {
+  text-align: right;
+}
+
+.cell-muted {
+  color: var(--muted);
+}
+
+/* =========================
+   Footer
+   ========================= */
+.site-footer {
+  margin-top: var(--sp-8);
+  padding: var(--sp-5) 0 var(--sp-3);
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  border-top: 1px solid var(--border);
+}
+
+/* =========================
+   Generic utilities
+   ========================= */
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  width: 100%;
+  align-items: center;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  gap: var(--sp-3);
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.mt-2 {
+  margin-top: var(--sp-2);
+}
+
+.mt-3 {
+  margin-top: var(--sp-3);
+}
+
+.mt-4 {
+  margin-top: var(--sp-4);
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #f4f6f7;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+/* Empty states */
+.empty {
+  padding: 28px;
+  text-align: center;
+  border: 1px dashed var(--border);
+  background: #fafcfc;
+  border-radius: var(--radius);
+  color: var(--muted);
+}
+
+/* Focus ring for clickable elements that aren’t inputs */
+a,
+button,
+.btn,
+[role="button"] {
+  outline: none;
+}
+
+a:focus-visible,
+button:focus-visible,
+.btn:focus-visible {
+  box-shadow: 0 0 0 4px var(--ring);
+  border-radius: var(--radius-sm);
+}
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 24px 18px;                   /* More horizontal padding */
+  box-sizing: border-box;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 110%;
+  left: 0;
+  min-width: 160px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  z-index: 100;
+  flex-direction: column;
+}
+
+.dropdown:hover .dropdown-menu,
+.dropdown:focus-within .dropdown-menu {
+  display: flex;
+}
+
+.dropdown-menu a {
+  padding: 10px 16px;
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border);
+}
+
+.dropdown-menu a:last-child {
+  border-bottom: none;
+}
+
+.dropdown-menu a:hover {
+  background: #f4f4f6;
+}
+
+/* Remove number input spinners/arrows for all browsers */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield; /* Firefox */
+}
+
+.btn,
+.btn.primary,
+.btn-add-item,
+.supplier-action-btn,
+.order-btn {
+  background: var(--brand);
+  color: #1e293b; /* Strong blue text */
+  border-color: var(--brand);
+  font-weight: 700; /* Strong/bold words */
+  box-shadow: 0 2px 8px rgba(96,165,250,0.08);
+  border-radius: var(--radius-sm);
+  transition: background .15s, border-color .15s, box-shadow .15s;
+}
+
+.btn:hover,
+.btn:focus,
+.btn.primary:hover,
+.btn.primary:focus,
+.btn-add-item:hover,
+.btn-add-item:focus,
+.supplier-action-btn:hover,
+.supplier-action-btn:focus,
+.order-btn:hover,
+.order-btn:focus {
+  background: var(--brand-600);
+  border-color: var(--brand-600);
+  color: #fff;
+}
+
+.input-wide {
+  width: 100%;
+  max-width: 340px;
+  box-sizing: border-box;
+  padding: 14px 16px;
+  font-size: var(--fs);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  margin-top: 6px;
+  background: #fff;
+}
+
+.input-wide[type="date"] {
+  width: 100%;
+  max-width: 340px;
+  box-sizing: border-box;
+  padding: 14px 16px;
+  font-size: var(--fs);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  margin-top: 6px;
+  background: #fff;
+}
+
+.supplier-action-btn {
+  min-width: 60px;
+  max-width: 90px;
+  height: 32px;
+  padding: 0 12px;
+  font-size: 0.95em;
+  border-radius: var(--radius-sm);
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-weight: 500;
+  transition: background .15s, border-color .15s, color .15s;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* Specific styles for each button */
+.order-btn {
+  background: var(--brand);
+  color: #fff;
+  border-color: var(--brand);
+}
+.order-btn:hover,
+.order-btn:focus {
+  background: var(--brand-600);
+  border-color: var(--brand-600);
+}
+
+.edit-btn {
+  background: #f1f5f9;
+  color: var(--muted);
+  border-color: #cbd5e1;
+}
+.edit-btn:hover,
+.edit-btn:focus {
+  background: #e2e8f0;
+  color: var(--brand);
+}
+
+.delete-btn {
+  background: #fef2f2;
+  color: #ef4444;
+  border-color: #ef4444;
+}
+.delete-btn:hover,
+.delete-btn:focus {
+  background: #ef4444;
+  color: #fff;
+}
+
+.btn-add-item {
+  background: #10b981;      /* Emerald green */
+  color: #fff;
+  border-color: #10b981;
+  font-weight: 600;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(16,185,129,0.08);
+}
+
+.btn-add-item:hover,
+.btn-add-item:focus {
+  background: #059669;
+  border-color: #059669;
+  color: #fff;
+}
+
+/* Strong, themed headers */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font);
+  font-weight: 800;
+  color: #1e293b; /* Strong dark blue */
+  letter-spacing: 0.5px;
+  margin-top: 0.8em;
+  margin-bottom: 0.5em;
+  background: none;
+}
+
+/* Themed body and paragraph text */
+body, p, li, td, th, label, span, div {
+  font-family: var(--font);
+  color: var(--text);
+  font-weight: 500;
+  background: none;
+}
+
+/* Muted text for less important info */
+.muted, .cell-muted {
+  color: var(--muted) !important;
+  font-weight: 400;
+}
+
+/* Optional: emphasize important words */
+strong, b {
+  color: #1e293b;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+/* Optional: style links to match theme */
+a {
+  color: var(--brand);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.15s;
+}
+a:hover, a:focus {
+  color: var(--brand-600);
+  text-decoration: underline;
+}

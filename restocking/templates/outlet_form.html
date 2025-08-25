@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+{% set back_url = url_for('suppliers_list') %}
+<h3>Setup Outlet Details</h3>
+<form method="post" class="card grid" style="max-width:400px; gap:14px;">
+  <label>Outlet Name
+    <input name="name" value="{{ outlet.name if outlet else '' }}" required>
+  </label>
+  <label>Address
+    <input name="address" value="{{ outlet.address if outlet else '' }}">
+  </label>
+  <label>Notes
+    <input name="notes" value="{{ outlet.notes if outlet else '' }}" placeholder="Any special instructions">
+  </label>
+  <button type="submit" class="btn primary">Save Outlet</button>
+</form>
+{% endblock %}

@@ -1,29 +1,33 @@
-{% extends "base.html" %}{% block content %}
-<div class="card grid">
-  <form method="get" class="row">
-    <input name="q" value="{{ q or '' }}" placeholder="Search suppliers..." />
-    <button>Search</button>
-  </form>
-  <form method="post" action="/suppliers/new" class="row">
-    <input name="name" placeholder="New supplier name" required>
-    <input name="phone" placeholder="WhatsApp phone (e.g. 6588xxxxxx)">
-    <input name="category" placeholder="Category (Dry/Frozen/Vegetables)">
-    <button type="submit">Add Supplier</button>
-  </form>
-</div>
+{% extends "base.html" %}
+{% block content %}
 
 <h3>Suppliers</h3>
-<div class="grid">
+<form method="get" class="row" style="margin-bottom: 16px;">
+  <input name="q" value="{{ q or '' }}" placeholder="Search existing suppliers" />
+  <button class="btn">Search</button>
+</form>
+<div class="grid" style="gap: 18px;">
   {% for s in suppliers %}
-    <div class="card row">
-      <div style="flex:1">
+  <div class="card" style="padding: 16px;">
+    <div class="row" style="justify-content: space-between; align-items: center;">
+      <div>
         <div><strong>{{ s.name }}</strong> — {{ s.category or 'Uncategorized' }}</div>
-        {% if s.phone %}<div>📞 {{ s.phone }}</div>{% endif %}
+        {% if s.phone %}<div style="color: var(--muted); font-size: 13px;">📞 {{ s.phone }}</div>{% endif %}
       </div>
-      <a href="/suppliers/{{ s.id }}/items">Items →</a>
+      <div class="row" style="gap: 6px; flex-wrap:nowrap;">
+        <a href="/suppliers/{{ s.id }}/items" class="supplier-action-btn order-btn">🛒 Order</a>
+        <a href="/suppliers/{{ s.id }}/edit" class="supplier-action-btn edit-btn">Edit</a>
+        <form method="post" action="/suppliers/{{ s.id }}/delete" style="display:inline;">
+          <button type="submit" class="supplier-action-btn delete-btn" onclick="return confirm('Delete this supplier?')">Delete</button>
+        </form>
+      </div>
     </div>
+  </div>
   {% else %}
-    <div>No suppliers yet.</div>
+  <div class="empty card">No suppliers yet.
+    <p> Select Add Supplier from the Menu to add new suppliers.</p>
+  </div>
   {% endfor %}
 </div>
+
 {% endblock %}

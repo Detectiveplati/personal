@@ -20,10 +20,18 @@ class Item(db.Model):
     supplier_id = db.Column(db.Integer, db.ForeignKey("suppliers.id"), nullable=False)
     name = db.Column(db.String(160), nullable=False)
     unit = db.Column(db.String(32), nullable=False)  # kg, pkt, carton, tin
-    default_qty = db.Column(db.Integer, nullable=False, default=1)
+    default_qty = db.Column(db.Float, nullable=False, default=1)
     item_type = db.Column(db.String(64), nullable=True)  # Dry, Frozen, Vegetables, etc.
     active = db.Column(db.Boolean, nullable=False, default=True)
 
     __table_args__ = (
         db.UniqueConstraint("supplier_id", "name", name="uq_item_per_supplier"),
     )
+
+
+class Outlet(db.Model):
+    __tablename__ = "outlets"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    address = db.Column(db.String(200), nullable=False)
+    notes = db.Column(db.Text, nullable=True)

@@ -1,37 +1,90 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>{% block title %}Restocking{% endblock %}</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="utf-8" />
+  <title>{% block title %}REST0K by Zack{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+
+  <!-- Favicons and manifest -->
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32.png') }}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16.png') }}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+  <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}" />
+
+  {% block extra_head %}{% endblock %}
 </head>
 <body>
-<div class="container">
-  <header class="site-header" data-header>
-    <div class="brand"><a href="{{ url_for('suppliers_list') }}" style="text-decoration:none;color:inherit;">Restocking</a></div>
-    <nav class="nav" data-nav>
-      <a href="{{ url_for('suppliers_list') }}">Suppliers</a>
-      <a href="{{ url_for('items_list') }}">Items</a>
-      <a href="{{ url_for('orders_list') }}">Orders</a>
-    </nav>
-  </header>
+  <a class="skip-link" href="#main">Skip to content</a>
 
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      <div class="grid">
-        {% for cat,msg in messages %}
-          <div class="flash {% if cat=='error' %}error{% endif %}">{{ msg }}</div>
-        {% endfor %}
+  <div class="container">
+    <header class="site-header" data-header>
+      <div class="brand" style="display:flex; justify-content:center; align-items:center; width:100%;">
+        <a href="{{ url_for('suppliers_list') }}">
+          REST0K
+        </a>
       </div>
-    {% endif %}
-  {% endwith %}
 
-  <main class="section">
-    {% block content %}{% endblock %}
-  </main>
-</div>
+      <!-- Inserted space and back button below brand -->
+      <div style="height:24px;"></div>
+      {% if back_url and request.endpoint != 'suppliers_list' %}
+        <a href="{{ back_url }}" class="btn" style="margin:0 0 16px 0; display:inline-block;">
+          ← Back
+        </a>
+      {% endif %}
 
-<script src="{{ url_for('static', filename='app.js') }}"></script>
+      <nav class="nav" data-nav aria-label="Primary">
+        <div class="dropdown">
+          <button class="btn" id="navDropdown" aria-haspopup="true" aria-expanded="false">
+            Menu ▼
+          </button>
+          <div class="dropdown-menu" aria-labelledby="navDropdown">
+            <a data-route href="{{ url_for('suppliers_list') }}">Suppliers</a>
+            <a data-route href="{{ url_for('outlet_setup') }}">Outlet Setup</a>
+            <a data-route href="{{ url_for('supplier_new_form') }}">Add Supplier</a>
+            {# <a data-route href="{{ url_for('orders_list') }}">Orders</a> #}
+            {# <a data-route href="{{ url_for('reports') }}">Reports</a> #}
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="alerts" role="status" aria-live="polite">
+          {% for cat, msg in messages %}
+            <div class="alert {{ 'is-error' if cat=='error' else 'is-info' }}">
+              <div class="alert-dot" aria-hidden="true"></div>
+              <div class="alert-text">{{ msg }}</div>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <main id="main" class="section" style="display:flex; flex-direction:column; align-items:center; width:100%;">
+      {% block content %}
+        <div style="display:flex; align-items:center; width:100%; max-width:600px;">
+          {% if back_url and request.endpoint != 'suppliers_list' %}
+            <a href="{{ back_url }}" class="btn" style="margin-right:16px;">
+              ← Back
+            </a>
+          {% endif %}
+          <h3>Item List</h3>
+        </div>
+        <!-- rest of your page content -->
+      {% endblock %}
+    </main>
+
+    <footer class="site-footer" style="text-align:center;">
+      <div class="muted">© {{ 2025 }} A Restocking App by Zack · Built for speed & sanity</div>
+    </footer>
+  </div>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+  {% block extra_scripts %}{% endblock %}
 </body>
 </html>

@@ -1,12 +1,12 @@
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from urllib.parse import quote_plus
 
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask.cli import with_appcontext
 
 from config import Config
-from models import db, Supplier, Item
+from models import db, Supplier, Item, Outlet
 
 
 def _digits_only(phone: str) -> str:
@@ -15,14 +15,23 @@ def _digits_only(phone: str) -> str:
 
 
 def _po_ref(prefix="SR"):
-    return f"{prefix}-{datetime.now().strftime('%Y-%m-%d-%H%M')}"
+    return f"{prefix}-{datetime.now().strftime('%Y-%m-%d-' '%H%M')}"
 
 
-def _build_whatsapp_text(outlet_name: str, items, notes: str):
-    # items = list[dict{name, qty, unit}]
+def _build_whatsapp_text(outlet_name, items, notes, address="", delivery_date=""):
     lines = []
     lines.append(f"*Order from: {outlet_name}*")
-    lines.append(f"Date: {datetime.now().strftime('%Y-%m-%d')}")
+    if address:
+        lines.append(f"Address: {address}")
+    if delivery_date:
+        lines.append(f"Date of Delivery: {delivery_date}")
+        # Emphasize if not next day
+        try:
+            delivery_dt = datetime.strptime(delivery_date, "%Y-%m-%d").date()
+            if delivery_dt != (datetime.utcnow().date() + timedelta(days=1)):
+                lines.append("❗️Order is NOT for next day!")
+        except Exception:
+            pass
     lines.append("")
     lines.append("Items:")
     for it in items:
@@ -71,6 +80,40 @@ def create_app():
         flash("Supplier created", "ok")
         return redirect(url_for("supplier_items", supplier_id=s.id))
 
+    @app.get("/suppliers/new")
+    def supplier_new_form():
+        return render_template("add_supplier.html")
+
+    @app.route("/suppliers/<int:supplier_id>/edit", methods=["GET", "POST"])
+    def edit_supplier(supplier_id):
+        supplier = Supplier.query.get_or_404(supplier_id)
+        if request.method == "POST":
+            supplier.name = request.form.get("name", supplier.name)
+            supplier.phone = request.form.get("phone", supplier.phone)
+            supplier.category = request.form.get("category", supplier.category)
+            db.session.commit()
+            flash("Supplier updated!", "ok")
+            return redirect(url_for("suppliers_list"))
+        return render_template("edit_supplier.html", supplier=supplier)
+
+    @app.post("/suppliers/<int:supplier_id>/edit")
+    def supplier_update(supplier_id):
+        supplier = Supplier.query.get_or_404(supplier_id)
+        supplier.name = request.form.get("name", supplier.name)
+        supplier.phone = request.form.get("phone", supplier.phone)
+        supplier.category = request.form.get("category", supplier.category)
+        db.session.commit()
+        flash("Supplier updated", "ok")
+        return redirect(url_for("suppliers_list"))
+
+    @app.post("/suppliers/<int:supplier_id>/delete")
+    def supplier_delete(supplier_id):
+        supplier = Supplier.query.get_or_404(supplier_id)
+        db.session.delete(supplier)
+        db.session.commit()
+        flash("Supplier deleted", "ok")
+        return redirect(url_for("suppliers_list"))
+
     # ---- Items per supplier ----
     @app.get("/suppliers/<int:supplier_id>/items")
     def supplier_items(supplier_id):
@@ -100,11 +143,11 @@ def create_app():
             return redirect(url_for("item_new", supplier_id=supplier.id))
 
         try:
-            dq = int(default_qty_raw)
+            dq = float(default_qty_raw)
             if dq <= 0:
                 raise ValueError
         except ValueError:
-            flash("Default qty must be a positive integer", "error")
+            flash("Default qty must be a positive number", "error")
             return redirect(url_for("item_new", supplier_id=supplier.id))
 
         new_item = Item(
@@ -146,11 +189,11 @@ def create_app():
             return redirect(url_for("item_edit", item_id=item_obj.id))
 
         try:
-            dq = int(default_qty_raw)
+            dq = float(default_qty_raw)
             if dq <= 0:
                 raise ValueError
         except ValueError:
-            flash("Default qty must be a positive integer", "error")
+            flash("Default qty must be a positive number", "error")
             return redirect(url_for("item_edit", item_id=item_obj.id))
 
         item_obj.name = name
@@ -169,22 +212,41 @@ def create_app():
         flash("Item updated", "ok")
         return redirect(url_for("supplier_items", supplier_id=item_obj.supplier_id))
 
+    @app.post("/items/<int:item_id>/delete")
+    def item_delete(item_id):
+        item = Item.query.get_or_404(item_id)
+        supplier_id = item.supplier_id
+        db.session.delete(item)
+        db.session.commit()
+        flash("Item deleted!", "ok")
+        return redirect(url_for("supplier_items", supplier_id=supplier_id))
+
     # ---- Ordering (Step 3) ----
     @app.get("/suppliers/<int:supplier_id>/order")
     def order_form(supplier_id):
         supplier = Supplier.query.get_or_404(supplier_id)
-        items = (
-            Item.query.filter_by(supplier_id=supplier.id, active=True)
-            .order_by(Item.name.asc())
-            .all()
+        items = Item.query.filter_by(supplier_id=supplier.id, active=True).order_by(Item.name.asc()).all()
+        outlets = Outlet.query.order_by(Outlet.name.asc()).all()
+        return render_template(
+            "order_form.html",
+            supplier=supplier,
+            items=items,
+            outlets=outlets,
+            datetime=datetime,
+            timedelta=timedelta
         )
-        return render_template("order_form.html", supplier=supplier, items=items)
 
     @app.post("/suppliers/<int:supplier_id>/order/preview")
     def order_preview(supplier_id):
         supplier = Supplier.query.get_or_404(supplier_id)
-        outlet_name = request.form.get("outlet_name", "Sari Rasa (East Village)").strip()
+        outlet_name = request.form.get("outlet_name", "").strip()
+        address = request.form.get("address", "").strip()
         notes = request.form.get("notes", "").strip()
+        delivery_date = request.form.get("delivery_date", "")  # <-- get date from form
+
+        # Fetch the outlet from the database
+        outlet = Outlet.query.filter_by(name=outlet_name).first()
+        address = outlet.address if outlet else ""
 
         selected = []
         for key, val in request.form.items():
@@ -193,7 +255,7 @@ def create_app():
             if not m:
                 continue
             try:
-                qty = int(val)
+                qty = float(val)  # <-- use float, not int
             except (TypeError, ValueError):
                 qty = 0
             if qty <= 0:
@@ -207,7 +269,7 @@ def create_app():
             flash("Pick at least one item (qty > 0).", "error")
             return redirect(url_for("order_form", supplier_id=supplier.id))
 
-        text = _build_whatsapp_text(outlet_name, selected, notes)
+        text = _build_whatsapp_text(outlet_name, selected, notes, address, delivery_date)
         encoded = quote_plus(text)
         phone = _digits_only(supplier.phone)
         wa_url = (
@@ -220,13 +282,56 @@ def create_app():
             "order_preview.html",
             supplier=supplier,
             outlet_name=outlet_name,
+            address=address,
             notes=notes,
+            delivery_date=delivery_date,  # <-- pass to template
             items=selected,
             wa_url=wa_url,
             text=text,
         )
 
+    # ---- Outlet setup ----
+    @app.route("/outlet/setup", methods=["GET", "POST"])
+    def outlet_setup():
+        outlet = Outlet.query.first()
+        if request.method == "POST":
+            if not outlet:
+                outlet = Outlet()
+                db.session.add(outlet)
+            outlet.name = request.form.get("name", "")
+            outlet.address = request.form.get("address", "")
+            outlet.notes = request.form.get("notes", "")
+            db.session.commit()
+            flash("Outlet details updated!", "ok")
+            return redirect(url_for("outlet_setup"))
+        return render_template("outlet_form.html", outlet=outlet)
+
+    @app.route("/suppliers/<int:supplier_id>/items/add", methods=["GET", "POST"])
+    def add_item(supplier_id):
+        supplier = Supplier.query.get_or_404(supplier_id)
+        if request.method == "POST":
+            name = request.form.get("name")
+            unit = request.form.get("unit")
+            default_qty = request.form.get("default_qty", type=float)
+            item_type = request.form.get("item_type")
+            item = Item(
+                name=name,
+                unit=unit,
+                default_qty=default_qty,
+                item_type=item_type,
+                supplier_id=supplier.id,
+                active=True
+            )
+            db.session.add(item)
+            db.session.commit()
+            flash("Item added!", "ok")
+            return redirect(url_for("supplier_items", supplier_id=supplier.id))
+        return render_template("add_item.html", supplier=supplier)
+
     return app
 
 
 app = create_app()
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)

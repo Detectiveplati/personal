@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card" style="max-width:400px; margin:auto; padding:18px;">
+  <h3 style="margin-top:0;">Edit Supplier</h3>
+  <form method="post" class="grid" style="gap: 12px;">
+    <label class="form-label">
+      <span>Name</span>
+      <input name="name" value="{{ supplier.name }}" required class="input-wide">
+    </label>
+    <label class="form-label">
+      <span>Phone</span>
+      <input name="phone" value="{{ supplier.phone }}" class="input-wide">
+    </label>
+    <label class="form-label">
+      <span>Category</span>
+      <input name="category" value="{{ supplier.category }}" class="input-wide">
+    </label>
+    <button type="submit" class="btn primary" style="font-size:1rem;">Save</button>
+    <div class="row" style="justify-content:flex-end; gap:8px; margin-top:12px;">
+      <a href="{{ url_for('suppliers_list') }}" class="btn" style="font-size:1rem;">← Back</a>
+      <form method="post" action="{{ url_for('supplier_delete', supplier_id=supplier.id) }}" style="display:inline;">
+        <button type="submit" class="btn btn-delete" style="font-size:1rem;" onclick="return confirm('Delete this supplier?')">Delete</button>
+      </form>
+    </div>
+  </form>
+</div>
+{% endblock %}

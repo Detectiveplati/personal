@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Edit Supplier</h3>
+<form method="post" class="card grid" style="max-width:400px">
+  <label>Name <input name="name" value="{{ supplier.name }}" required></label>
+  <label>Phone <input name="phone" value="{{ supplier.phone }}"></label>
+  <label>Category <input name="category" value="{{ supplier.category }}"></label>
+  <button type="submit">Save</button>
+  <a href="{{ url_for('suppliers_list') }}">Cancel</a>
+</form>
+{% endblock %}

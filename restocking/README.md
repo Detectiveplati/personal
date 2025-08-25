@@ -22,13 +22,13 @@ Result: **fast, consistent, mistake-free ordering**.
 
 ## 🛠️ Features (Planned)
 
-- [ ] **Supplier Management**  
+- [x] **Supplier Management**  
   Record supplier details (name, contact, category).
 
-- [ ] **Customisable Stock Items**  
+- [x] **Customisable Stock Items**  
   Add/edit items linked to each supplier with units (kg, carton, packet, etc.).
 
-- [ ] **Order Checklist Flow (Alpha)**  
+- [x] **Order Checklist Flow (Alpha)**  
   - Choose supplier  
   - Adjust item quantities via `+ / -` buttons  
   - Preview order  
@@ -117,7 +117,7 @@ Result: **fast, consistent, mistake-free ordering**.
 ## 📄 WhatsApp Message Format
 
 ```text
-*Order from: Sari Rasa (East Village)*
+*Order from: Your Outlet*
 Date: 2025-08-24
 
 Items:
