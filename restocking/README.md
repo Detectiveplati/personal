@@ -28,20 +28,27 @@ Result: **fast, consistent, mistake-free ordering**.
 - [x] **Customisable Stock Items**  
   Add/edit items linked to each supplier with units (kg, carton, packet, etc.).
 
-- [x] **Order Checklist Flow (Alpha)**  
+- [x] **Order Checklist Flow**  
   - Choose supplier  
   - Adjust item quantities via `+ / -` buttons  
   - Preview order  
   - Auto-generate WhatsApp message with one click  
 
+- [x] **Notes & Defaults**  
+  Configure outlet name, default delivery notes, and par levels.
+
 - [ ] **Order History** *(MVP+)*  
   Save past orders for reference and auditing.
 
-- [ ] **Notes & Defaults**  
-  Configure outlet name, default delivery notes, and par levels.
+- [ ] **Multiple Outlets**   
+Include functionality for multiple outlets.
 
 - [ ] **Camera scan invoice details capture**  
   Scan invoices via phone and auto capture quantity of items, and update stocks prices on the fly.
+
+- [ ] **Integration/Rebuilding of web app as a mobile app**  
+  Either rebuilding the app as an iOS & android app or integration.
+
 ---
 
 ## 📦 Setup Flow
