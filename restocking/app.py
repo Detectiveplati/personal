@@ -7,9 +7,14 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask.cli import with_appcontext
 from flask_migrate import Migrate
 
-from config import Config, ProdConfig
-from models import db, Supplier, Item, Outlet
+try:
+    from .config import Config, ProdConfig
+    from .models import db, Supplier, Item, Outlet  # Add missing imports
+except ImportError:
+    from config import Config, ProdConfig
+    from models import db, Supplier, Item, Outlet  # Add missing imports
 
+migrate = Migrate()
 
 def _digits_only(phone: str) -> str:
     # keep only digits for https://wa.me/
@@ -49,7 +54,7 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
     db.init_app(app)
-    migrate = Migrate(app, db) 
+    migrate.init_app(app, db)  # Change this line
 
     # Allows initiating the db via $flask init-db
     @app.cli.command("init-db")
