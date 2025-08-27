@@ -37,6 +37,9 @@ Result: **fast, consistent, mistake-free ordering**.
 - [x] **Notes & Defaults**  
   Configure outlet name, default delivery notes, and par levels.
 
+- [x] **Deploy Live**  
+  Configure PostgreDB(NeonDB) & host webapp(Render) for actual usage.
+
 - [ ] **Order History** *(MVP+)*  
   Save past orders for reference and auditing.
 
@@ -133,4 +136,4 @@ Items:
 - Salt: 2 pkt
 
 Notes: Please deliver before 10am tomorrow.
-PO Ref: SR-2025-08-24-001
+PO Ref: PO-2025-08-24-001
