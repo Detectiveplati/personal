@@ -5,6 +5,7 @@ from urllib.parse import quote_plus
 
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask.cli import with_appcontext
+from flask_migrate import Migrate
 
 from config import Config, ProdConfig
 from models import db, Supplier, Item, Outlet
@@ -48,6 +49,7 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
     db.init_app(app)
+    migrate = Migrate(app, db) 
 
     # Allows initiating the db via $flask init-db
     @app.cli.command("init-db")
