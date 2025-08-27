@@ -11,7 +11,7 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret")
 
-class ProdConfig(BaseConfig):
+class ProdConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.environ["DATABASE_URL"]
     SECRET_KEY = os.environ["SECRET_KEY"]
     SQLALCHEMY_ENGINE_OPTIONS = {
