@@ -1,11 +1,12 @@
 import re
+import os
 from datetime import datetime, timedelta
 from urllib.parse import quote_plus
 
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask.cli import with_appcontext
 
-from config import Config
+from config import Config, ProdConfig
 from models import db, Supplier, Item, Outlet
 
 
@@ -13,11 +14,11 @@ def _digits_only(phone: str) -> str:
     # keep only digits for https://wa.me/
     return re.sub(r"\D", "", phone or "")
 
-
-def _po_ref(prefix="SR"):
+# This creates a reference number starting with prefix PO
+def _po_ref(prefix="PO"):
     return f"{prefix}-{datetime.now().strftime('%Y-%m-%d-' '%H%M')}"
 
-
+# This function builds the whatsapp message
 def _build_whatsapp_text(outlet_name, items, notes, address="", delivery_date=""):
     lines = []
     lines.append(f"*Order from: {outlet_name}*")
@@ -42,13 +43,13 @@ def _build_whatsapp_text(outlet_name, items, notes, address="", delivery_date=""
     lines.append(f"PO Ref: {_po_ref('SR')}")
     return "\n".join(lines)
 
-
-def create_app():
+# This creates the app using the config
+def create_app(config_class=Config):
     app = Flask(__name__)
-    app.config.from_object(Config)
+    app.config.from_object(config_class)
     db.init_app(app)
 
-    # ---- CLI: flask init-db ----
+    # Allows initiating the db via $flask init-db
     @app.cli.command("init-db")
     @with_appcontext
     def init_db():
@@ -58,13 +59,14 @@ def create_app():
     # ---- Suppliers (list + quick create) ----
     @app.get("/")
     def suppliers_list():
+        # Have a search bar(query) so if there are many more suppliers, we can filter them
         q = (request.args.get("q") or "").strip()
         qry = Supplier.query
         if q:
             qry = qry.filter(Supplier.name.ilike(f"%{q}%"))
         suppliers = qry.order_by(Supplier.name.asc()).all()
         return render_template("suppliers_list.html", suppliers=suppliers, q=q)
-
+    # To create new suppliers
     @app.post("/suppliers/new")
     def suppliers_create():
         name = (request.form.get("name") or "").strip()
@@ -73,7 +75,7 @@ def create_app():
         if not name:
             flash("Supplier name is required", "error")
             return redirect(url_for("suppliers_list"))
-
+        # Write into db the Supplier table with their corresponding columns
         s = Supplier(name=name, phone=phone, category=category)
         db.session.add(s)
         db.session.commit()
@@ -83,7 +85,7 @@ def create_app():
     @app.get("/suppliers/new")
     def supplier_new_form():
         return render_template("add_supplier.html")
-
+    # This function is for editing suppliers by getting current info and posting new updates 
     @app.route("/suppliers/<int:supplier_id>/edit", methods=["GET", "POST"])
     def edit_supplier(supplier_id):
         supplier = Supplier.query.get_or_404(supplier_id)
@@ -95,17 +97,7 @@ def create_app():
             flash("Supplier updated!", "ok")
             return redirect(url_for("suppliers_list"))
         return render_template("edit_supplier.html", supplier=supplier)
-
-    @app.post("/suppliers/<int:supplier_id>/edit")
-    def supplier_update(supplier_id):
-        supplier = Supplier.query.get_or_404(supplier_id)
-        supplier.name = request.form.get("name", supplier.name)
-        supplier.phone = request.form.get("phone", supplier.phone)
-        supplier.category = request.form.get("category", supplier.category)
-        db.session.commit()
-        flash("Supplier updated", "ok")
-        return redirect(url_for("suppliers_list"))
-
+    # This is for deleting a supplier
     @app.post("/suppliers/<int:supplier_id>/delete")
     def supplier_delete(supplier_id):
         supplier = Supplier.query.get_or_404(supplier_id)
@@ -114,7 +106,7 @@ def create_app():
         flash("Supplier deleted", "ok")
         return redirect(url_for("suppliers_list"))
 
-    # ---- Items per supplier ----
+    # Items for current supplier
     @app.get("/suppliers/<int:supplier_id>/items")
     def supplier_items(supplier_id):
         supplier = Supplier.query.get_or_404(supplier_id)
@@ -125,6 +117,7 @@ def create_app():
         )
         return render_template("items_list.html", supplier=supplier, items=items)
 
+    # This is to generate a new item for a supplier, if get, give the form, if post, write into db
     @app.get("/suppliers/<int:supplier_id>/items/new")
     def item_new(supplier_id):
         supplier = Supplier.query.get_or_404(supplier_id)
@@ -162,12 +155,12 @@ def create_app():
             db.session.commit()
         except Exception:
             db.session.rollback()
-            flash("Item name must be unique per supplier", "error")
+            flash("There is already an item with this name for the supplier", "error")
             return redirect(url_for("item_new", supplier_id=supplier.id))
 
         flash("Item added", "ok")
         return redirect(url_for("supplier_items", supplier_id=supplier.id))
-
+    # This is for editing an item, get the form filled in, then post for edits
     @app.get("/items/<int:item_id>/edit")
     def item_edit(item_id):
         item_obj = Item.query.get_or_404(item_id)
@@ -211,7 +204,7 @@ def create_app():
 
         flash("Item updated", "ok")
         return redirect(url_for("supplier_items", supplier_id=item_obj.supplier_id))
-
+    # Deleting an item
     @app.post("/items/<int:item_id>/delete")
     def item_delete(item_id):
         item = Item.query.get_or_404(item_id)
@@ -221,7 +214,7 @@ def create_app():
         flash("Item deleted!", "ok")
         return redirect(url_for("supplier_items", supplier_id=supplier_id))
 
-    # ---- Ordering (Step 3) ----
+    # This is for creating a new order
     @app.get("/suppliers/<int:supplier_id>/order")
     def order_form(supplier_id):
         supplier = Supplier.query.get_or_404(supplier_id)
@@ -235,7 +228,7 @@ def create_app():
             datetime=datetime,
             timedelta=timedelta
         )
-
+    # Posting in suppliers will give preview of order
     @app.post("/suppliers/<int:supplier_id>/order/preview")
     def order_preview(supplier_id):
         supplier = Supplier.query.get_or_404(supplier_id)
@@ -290,7 +283,7 @@ def create_app():
             text=text,
         )
 
-    # ---- Outlet setup ----
+    # This is to setup the outlet
     @app.route("/outlet/setup", methods=["GET", "POST"])
     def outlet_setup():
         outlet = Outlet.query.first()
@@ -331,7 +324,12 @@ def create_app():
     return app
 
 
-app = create_app()
+# Choose config based on environment variable
+if os.getenv("FLASK_ENV") == "production":
+    app = create_app(ProdConfig)
+else:
+    app = create_app(Config)
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
