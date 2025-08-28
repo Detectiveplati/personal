@@ -1,62 +1,69 @@
 # 🍴 Restaurant Restocking App
 
-A mobile-first checklist app to simplify **restaurant restocking**.  
-Staff can tick items to order, and with one click the app generates a pre-filled WhatsApp message to send directly to suppliers.  
+A **mobile-first checklist app** that simplifies restaurant restocking.  
+Staff can tick items to order, and with one click, the app generates a pre-filled WhatsApp message to send directly to suppliers.
 
 ---
 
 ## 🚀 Motivation
 
-I started as a restaurant chef-owner, so ordering of stocks have always been a big pain point.
-It means managing **hundreds of stock items** — from dry goods to fresh vegetables to frozen meats. Staff often forget certain items when placing orders, causing delays, missing ingredients, and operational stress and diner rush hour delays due to stocks not properly ordered.
+As a chef-owner, I’ve always found stock ordering to be a major pain point.  
+Restaurants deal with **hundreds of items** — from dry goods to fresh vegetables and frozen meats. Staff often forget items when placing orders, leading to **delays, missing ingredients, and stressful rush hours**.
 
-This app reduces restocking into a **guided checklist flow**:
-- Staff select a supplier
-- Tick items and quantities they need
-- One-tap generate a WhatsApp message to the specific supplier
-- Send directly to supplier  
+This app turns restocking into a **guided checklist flow**:
+- Staff select a supplier  
+- Tick required items and quantities  
+- One-tap generates a WhatsApp order message  
+- Send directly to the supplier  
 
-Result: **fast, consistent, mistake-free ordering**.
+Result: **fast, consistent, and error-free ordering**.
 
 ---
 
 ## 🛠️ Features (Planned)
 
 - [x] **Supplier Management**  
-  Record supplier details (name, contact, category).
+  Store supplier details (name, contact, category).  
 
-- [x] **Customisable Stock Items**  
-  Add/edit items linked to each supplier with units (kg, carton, packet, etc.).
+- [x] **Customizable Stock Items**  
+  Add/edit supplier-linked items with units (kg, carton, packet, etc.).  
 
 - [x] **Order Checklist Flow**  
   - Choose supplier  
-  - Adjust item quantities via `+ / -` buttons  
+  - Adjust quantities via `+ / -` buttons  
   - Preview order  
-  - Auto-generate WhatsApp message with one click  
+  - Auto-generate WhatsApp message  
 
 - [x] **Notes & Defaults**  
-  Configure outlet name, default delivery notes, and par levels.
+  Set outlet name, delivery notes, and par levels.  
 
-- [x] **Deploy Live**  
-  Configure PostgreDB(NeonDB) & host webapp(Render) for actual usage.
+- [x] **Live Deployment**  
+  Configure PostgreSQL (NeonDB) & host on Render.  
+
+- [ ] **User Authentication**  
+  Add login/registration for secure access.  
+
+- [ ] **CSV Import/Export**  
+  - Add CSV Import for easy supplier and items database update.
+  - Add CSV Export for future Order History export for audit. 
 
 - [ ] **Order History** *(MVP+)*  
-  Save past orders for reference and auditing.
+  Store and view past orders for auditing.  
 
-- [ ] **Multiple Outlets**   
-Include functionality for multiple outlets.
+- [ ] **Multi-Outlet Support**  
+  Manage multiple outlets within one system.  
 
-- [ ] **Camera scan invoice details capture**  
-  Scan invoices via phone and auto capture quantity of items, and update stocks prices on the fly.
+- [ ] **Invoice Scanning**  
+  Capture invoice data via camera and auto-update stock and prices.  
 
-- [ ] **Integration/Rebuilding of web app as a mobile app**  
-  Either rebuilding the app as an iOS & android app or integration.
+- [ ] **Mobile App Integration/Rebuild**  
+  Convert to native iOS/Android app or integrate as a PWA.  
 
 ---
 
 ## 📦 Setup Flow
 
-**Supplier acquired → Supplier details keyed in → Supplier stock keyed in**
+**Supplier added → Stock items keyed in → Order placed**
 
 ### 1. Supplier Details
 - Supplier name  
@@ -69,21 +76,21 @@ Include functionality for multiple outlets.
 - Item unit (e.g., kg, packet, carton, tin)  
 
 ### 3. Ordering Flow (Alpha)
-- Go to supplier page  
-- Choose stock items  
-- Forward to WhatsApp  
-- WhatsApp message auto-configured → tap send  
+- Open supplier page  
+- Select stock items  
+- Generate WhatsApp message  
+- Tap send  
 
 ---
 
 ## 🖥️ Technical Plan
 
 ### Tech Stack
-- **Backend:** Flask (Python) — handles routes, form submissions, WhatsApp link generation  
-- **Database:** SQLAlchemy ORM + SQLite (dev) / Postgres (production-ready)  
-- **Frontend:** Server-rendered HTML templates (Jinja2) with CSS + vanilla JS for interactivity (`+ / -` qty buttons, dynamic updates)  
-- **Cross-Platform:** Mobile-friendly responsive design, accessible via browser (installable as a web app via “Add to Home Screen”)  
-- **Integrations:** WhatsApp deep link (`https://wa.me/`) for one-click sending of orders
+- **Backend:** Flask (Python) — routes, forms, WhatsApp link generation  
+- **Database:** SQLAlchemy ORM + SQLite (dev) / PostgreSQL (production)  
+- **Frontend:** Jinja2 templates + CSS + vanilla JS (interactive qty buttons, dynamic updates)  
+- **Cross-Platform:** Mobile-first responsive design, installable as a PWA  
+- **Integrations:** WhatsApp deep link (`https://wa.me/`) for one-tap ordering  
 
 ---
 
@@ -101,26 +108,26 @@ Include functionality for multiple outlets.
 
 ## 📲 User Flow (Screens)
 
-1. **Suppliers Page**
-   - List of suppliers with category filter  
+1. **Suppliers Page**  
+   - List suppliers with category filter  
    - "Add Supplier" button  
 
-2. **Items Page (per Supplier)**
-   - List of items (name, unit, default qty)  
+2. **Items Page (per Supplier)**  
+   - List items (name, unit, default qty)  
    - Add/Edit item  
    - Start order  
 
-3. **Order Checklist**
-   - Increment/decrement quantities  
+3. **Order Checklist**  
+   - Adjust quantities  
    - Preview selected items  
-   - Notes field  
+   - Add notes  
 
-4. **Order Preview**
-   - Render WhatsApp message  
-   - Tap "Send via WhatsApp" → opens app with message pre-filled  
+4. **Order Preview**  
+   - WhatsApp message preview  
+   - Tap “Send via WhatsApp”  
 
 5. **Order History** *(optional MVP+)*  
-   - View past orders with timestamp  
+   - View past orders with timestamps  
 
 ---
 

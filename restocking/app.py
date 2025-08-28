@@ -118,7 +118,7 @@ def create_app(config_class=Config):
     def supplier_items(supplier_id):
         supplier = Supplier.query.get_or_404(supplier_id)
         items = (
-            Item.query.filter_by(supplier_id=supplier.id, active=True)
+            Item.query.filter_by(supplier_id=supplier.id) #Show all items,do not filter by inactive
             .order_by(Item.name.asc())
             .all()
         )
