@@ -8,7 +8,10 @@
 </form>
 <div class="grid" style="gap: 18px;">
   {% for s in suppliers %}
-  <div class="card" style="padding: 16px;">
+  <div class="card" style="padding: 16px; position:relative;">
+    <form method="post" action="/suppliers/{{ s.id }}/delete" style="position:absolute; top:12px; right:12px;">
+      <button type="submit" class="supplier-action-btn delete-btn" onclick="return confirm('Delete this supplier?')">Delete</button>
+    </form>
     <div class="row" style="justify-content: space-between; align-items: center;">
       <div>
         <div><strong>{{ s.name }}</strong> — {{ s.category or 'Uncategorized' }}</div>
@@ -17,9 +20,6 @@
       <div class="row" style="gap: 6px; flex-wrap:nowrap;">
         <a href="/suppliers/{{ s.id }}/items" class="supplier-action-btn order-btn">🛒 Order</a>
         <a href="/suppliers/{{ s.id }}/edit" class="supplier-action-btn edit-btn">Edit</a>
-        <form method="post" action="/suppliers/{{ s.id }}/delete" style="display:inline;">
-          <button type="submit" class="supplier-action-btn delete-btn" onclick="return confirm('Delete this supplier?')">Delete</button>
-        </form>
       </div>
     </div>
   </div>

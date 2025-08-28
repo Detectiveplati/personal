@@ -5,6 +5,9 @@
 <div class="row">
   <a href="/suppliers/{{ supplier.id }}/items/new" class="btn btn-add-item">+ Add Item</a>
 </div>
+<div class="row" style="margin: 8px 0;">
+  <a href="/suppliers/{{ supplier.id }}/order" class="btn primary" style="color:#fff;">🛒 Start Order</a>
+</div>
 <div class="grid">
   {% for it in items %}
   <div class="card row">
@@ -18,9 +21,7 @@
   <div class="card">No items yet. Add your first one.</div>
   {% endfor %}
 </div>
-<div class="row" style="margin: 8px 0;">
-  <a href="/suppliers/{{ supplier.id }}/order" class="btn primary" style="color:#fff;">🛒 Start Order</a>
-</div>
+
 <div class="row" style="margin-bottom: 16px;">
   <a href="{{ url_for('suppliers_list') }}" class="btn" style="margin-left:0;">
     ← Back
