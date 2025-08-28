@@ -46,8 +46,8 @@
       this.textContent='✅ Copied';
       setTimeout(()=>this.textContent='Copy Message', 1500);
     ">Copy Message</button>
-    {% set back_url = url_for('order_form', supplier_id=supplier.id) %}
-    <a href="{{ back_url }}" class="btn btn-small btn-delete">Back</a>
+    <a href="{{ url_for('order_form', supplier_id=supplier.id) }}?{% for key, value in form_data.items() %}{{ key }}={{ value }}&{% endfor %}" 
+       class="btn">← Edit Order</a>
   </div>
 </div>
 

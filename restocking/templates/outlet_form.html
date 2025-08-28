@@ -12,6 +12,9 @@
   <label>Notes
     <input name="notes" value="{{ outlet.notes if outlet else '' }}" placeholder="Any special instructions">
   </label>
+  <input id="qty_{{it.id}}" name="qty_{{it.id}}" type="number" min="0" 
+       value="{{ form_data.get('qty_' + it.id|string, '0.00') }}" 
+       step="{{ it.default_qty }}" class="qty-input">
   <button type="submit" class="btn primary">Save Outlet</button>
 </form>
 {% endblock %}

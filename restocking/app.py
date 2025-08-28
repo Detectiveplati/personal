@@ -227,11 +227,16 @@ def create_app(config_class=Config):
         supplier = Supplier.query.get_or_404(supplier_id)
         items = Item.query.filter_by(supplier_id=supplier.id, active=True).order_by(Item.name.asc()).all()
         outlets = Outlet.query.order_by(Outlet.name.asc()).all()
+        
+        # Get form data from query parameters if returning from preview
+        form_data = request.args.to_dict()
+        
         return render_template(
             "order_form.html",
             supplier=supplier,
             items=items,
             outlets=outlets,
+            form_data=form_data,
             datetime=datetime,
             timedelta=timedelta
         )
@@ -242,7 +247,13 @@ def create_app(config_class=Config):
         outlet_name = request.form.get("outlet_name", "").strip()
         address = request.form.get("address", "").strip()
         notes = request.form.get("notes", "").strip()
-        delivery_date = request.form.get("delivery_date", "")  # <-- get date from form
+        delivery_date = request.form.get("delivery_date", "")
+
+        # Get all form data for quantities
+        form_data = {}
+        for key, value in request.form.items():
+            if key.startswith('qty_'):
+                form_data[key] = value
 
         # Fetch the outlet from the database
         outlet = Outlet.query.filter_by(name=outlet_name).first()
@@ -284,8 +295,9 @@ def create_app(config_class=Config):
             outlet_name=outlet_name,
             address=address,
             notes=notes,
-            delivery_date=delivery_date,  # <-- pass to template
+            delivery_date=delivery_date,
             items=selected,
+            form_data=form_data,  # Pass form data
             wa_url=wa_url,
             text=text,
         )
