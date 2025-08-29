@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>📋 Order Details</h3>
+<div class="card" style="margin-bottom: 16px;">
+  <h4>{{ order.supplier.name }}</h4>
+  <div><strong>Outlet:</strong> {{ order.outlet_name }}</div>
+  {% if order.address %}<div><strong>Address:</strong> {{ order.address }}</div>{% endif %}
+  {% if order.notes %}<div><strong>Notes:</strong> {{ order.notes }}</div>{% endif %}
+  {% if order.delivery_date %}<div><strong>Delivery Date:</strong> {{ order.delivery_date.strftime('%Y-%m-%d') }}</div>{% endif %}
+  <div><strong>Ordered:</strong> {{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+</div>
+
+<div class="card">
+  <h4>Items Ordered</h4>
+  {% for item in order.order_items %}
+  <div class="row" style="justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border);">
+    <span>{{ item.item_name }}</span>
+    <span>{{ item.quantity }} {{ item.unit }}</span>
+  </div>
+  {% endfor %}
+</div>
+
+<div style="margin-top: 16px;">
+  <a href="{{ url_for('order_history') }}" class="btn">← Back to Orders</a>
+</div>
+{% endblock %}
