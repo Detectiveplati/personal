@@ -427,19 +427,39 @@ def create_app(config_class=Config):
             return redirect(url_for("outlets_list"))
         return render_template("outlet_form.html")
 
+    @app.route("/reset-password", methods=["GET", "POST"])
+    def reset_password():
+        if request.method == "POST":
+            email = request.form["email"]
+            new_password = request.form["new_password"]
+            user = User.query.filter_by(email=email).first()l=email).first()
+            if user:
+                user.password_hash = generate_password_hash(new_password)_password_hash(new_password)
+                db.session.commit()
+                flash("Password reset successful!", "success")                flash("Password reset successful!", "success")
+                return redirect(url_for("login"))  return redirect(url_for("login"))
+            else:            else:
+                flash("Email not found.", "danger")                flash("Email not found.", "danger")
+        return render_template("reset_password.html")d.html")
+
     return app
 
 
-# Choose config based on environment variable
-if os.getenv("FLASK_ENV") == "production":
-    app = create_app(ProdConfig)
+# Choose config based on environment variable# Choose config based on environment variable
+if os.getenv("FLASK_ENV") == "production":if os.getenv("FLASK_ENV") == "production":
+    app = create_app(ProdConfig)onfig)
 else:
     app = create_app(Config)
 
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+
+
+
+
+
+    app.run(host="0.0.0.0", port=5000, debug=True)if __name__ == "__main__":    return User.query.get(int(user_id))    return User.query.get(int(user_id))
 
 
 if __name__ == "__main__":
