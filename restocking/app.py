@@ -71,9 +71,8 @@ def create_app(config_class=Config):
     @app.get("/")
     @login_required
     def suppliers_list():
-        # Have a search bar(query) so if there are many more suppliers, we can filter them
         q = (request.args.get("q") or "").strip()
-        qry = Supplier.query
+        qry = Supplier.query.filter_by(user_id=current_user.id)
         if q:
             qry = qry.filter(Supplier.name.ilike(f"%{q}%"))
         suppliers = qry.order_by(Supplier.name.asc()).all()
@@ -407,6 +406,26 @@ def create_app(config_class=Config):
             flash("Registration successful!", "ok")
             return redirect(url_for("suppliers_list"))
         return render_template("register.html")
+
+    @app.route("/outlets")
+    @login_required
+    def outlets_list():
+        outlets = Outlet.query.filter_by(user_id=current_user.id).all()
+        return render_template("outlets.html", outlets=outlets)
+
+    @app.route("/outlets/new", methods=["GET", "POST"])
+    @login_required
+    def outlet_create():
+        if request.method == "POST":
+            name = request.form["name"]
+            address = request.form["address"]
+            notes = request.form.get("notes", "")
+            outlet = Outlet(name=name, address=address, notes=notes, user_id=current_user.id)
+            db.session.add(outlet)
+            db.session.commit()
+            flash("Outlet created!", "success")
+            return redirect(url_for("outlets_list"))
+        return render_template("outlet_form.html")
 
     return app
 
