@@ -9,10 +9,10 @@ from flask_migrate import Migrate
 
 try:
     from .config import Config, ProdConfig
-    from .models import db, Supplier, Item, Outlet  # Add missing imports
+    from .models import db, Supplier, Item, Outlet, Order, OrderItem  # Add Order, OrderItem
 except ImportError:
     from config import Config, ProdConfig
-    from models import db, Supplier, Item, Outlet  # Add missing imports
+    from models import db, Supplier, Item, Outlet, Order, OrderItem  # Add Order, OrderItem
 
 migrate = Migrate()
 
@@ -280,6 +280,41 @@ def create_app(config_class=Config):
             flash("Pick at least one item (qty > 0).", "error")
             return redirect(url_for("order_form", supplier_id=supplier.id))
 
+        # **AUTOMATICALLY SAVE ORDER TO HISTORY**
+        # Parse delivery date
+        delivery_date_parsed = None
+        if delivery_date:
+            try:
+                delivery_date_parsed = datetime.strptime(delivery_date, "%Y-%m-%d").date()
+            except ValueError:
+                pass
+    
+        # Create new order
+        order = Order(
+            supplier_id=supplier.id,
+            outlet_name=outlet_name,
+            address=address,
+            notes=notes,
+            delivery_date=delivery_date_parsed,
+            total_items=len(selected)
+        )
+        db.session.add(order)
+        db.session.flush()  # To get the order ID
+    
+        # Save order items
+        for item_data in selected:
+            order_item = OrderItem(
+                order_id=order.id,
+                item_name=item_data['name'],
+                unit=item_data['unit'],
+                quantity=item_data['qty']
+            )
+            db.session.add(order_item)
+    
+        db.session.commit()
+        flash("Order saved to history!", "ok")
+
+        # Build WhatsApp message
         text = _build_whatsapp_text(outlet_name, selected, notes, address, delivery_date)
         encoded = quote_plus(text)
         phone = _digits_only(supplier.phone)
@@ -297,10 +332,81 @@ def create_app(config_class=Config):
             notes=notes,
             delivery_date=delivery_date,
             items=selected,
-            form_data=form_data,  # Pass form data
+            form_data=form_data,
             wa_url=wa_url,
             text=text,
         )
+
+    # Route to save order history
+    @app.post("/suppliers/<int:supplier_id>/order/save")
+    def save_order(supplier_id):
+        supplier = Supplier.query.get_or_404(supplier_id)
+        outlet_name = request.form.get("outlet_name", "").strip()
+        address = request.form.get("address", "").strip()
+        notes = request.form.get("notes", "").strip()
+        delivery_date_str = request.form.get("delivery_date", "")
+        
+        # Parse delivery date
+        delivery_date = None
+        if delivery_date_str:
+            try:
+                delivery_date = datetime.strptime(delivery_date_str, "%Y-%m-%d").date()
+            except ValueError:
+                pass
+        
+        # Create new order
+        order = Order(
+            supplier_id=supplier.id,
+            outlet_name=outlet_name,
+            address=address,
+            notes=notes,
+            delivery_date=delivery_date
+        )
+        db.session.add(order)
+        db.session.flush()  # To get the order ID
+        
+        # Save order items
+        total_items = 0
+        for key, val in request.form.items():
+            m = re.match(r"qty_(\d+)$", key)
+            if not m:
+                continue
+            try:
+                qty = float(val)
+            except (TypeError, ValueError):
+                qty = 0
+            if qty <= 0:
+                continue
+            
+            item_id = int(m.group(1))
+            item = Item.query.get(item_id)
+            if item and item.supplier_id == supplier.id:
+                order_item = OrderItem(
+                    order_id=order.id,
+                    item_name=item.name,
+                    unit=item.unit,
+                    quantity=qty
+                )
+                db.session.add(order_item)
+                total_items += 1
+        
+        order.total_items = total_items
+        db.session.commit()
+        
+        flash("Order saved to history!", "ok")
+        return redirect(url_for("order_history"))
+
+    # Route to view order history
+    @app.get("/orders")
+    def order_history():
+        orders = Order.query.order_by(Order.created_at.desc()).all()
+        return render_template("order_history.html", orders=orders)
+
+    # Route to view specific order details
+    @app.get("/orders/<int:order_id>")
+    def order_detail(order_id):
+        order = Order.query.get_or_404(order_id)
+        return render_template("order_detail.html", order=order)
 
     # This is to setup the outlet
     @app.route("/outlet/setup", methods=["GET", "POST"])

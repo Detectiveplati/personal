@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
 db = SQLAlchemy()
 
@@ -35,3 +36,30 @@ class Outlet(db.Model):
     name = db.Column(db.String(100), nullable=False)
     address = db.Column(db.String(200), nullable=False)
     notes = db.Column(db.Text, nullable=True)
+
+
+class Order(db.Model):
+    __tablename__ = "orders"
+    id = db.Column(db.Integer, primary_key=True)
+    supplier_id = db.Column(db.Integer, db.ForeignKey("suppliers.id"), nullable=False)
+    outlet_name = db.Column(db.String(200), nullable=False)
+    address = db.Column(db.Text)
+    notes = db.Column(db.Text)
+    delivery_date = db.Column(db.Date)
+    total_items = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relationship
+    supplier = db.relationship("Supplier", backref="orders")
+
+
+class OrderItem(db.Model):
+    __tablename__ = "order_items"
+    id = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey("orders.id"), nullable=False)
+    item_name = db.Column(db.String(200), nullable=False)
+    unit = db.Column(db.String(50), nullable=False)
+    quantity = db.Column(db.Float, nullable=False)
+
+    # Relationship
+    order = db.relationship("Order", backref="order_items")
