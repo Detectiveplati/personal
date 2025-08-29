@@ -7,6 +7,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask.cli import with_appcontext
 from flask_migrate import Migrate
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash
 
 try:
     from .config import Config, ProdConfig
