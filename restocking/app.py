@@ -447,21 +447,14 @@ def create_app(config_class=Config):
 
 
 # Choose config based on environment variable# Choose config based on environment variable
-if os.getenv("FLASK_ENV") == "production":if os.getenv("FLASK_ENV") == "production":
-    app = create_app(ProdConfig)onfig)
+if os.getenv("FLASK_ENV") == "production":
+    app = create_app(ProdConfig)
 else:
     app = create_app(Config)
 
-
 @login_manager.user_loader
 def load_user(user_id):
-
-
-
-
-
-    app.run(host="0.0.0.0", port=5000, debug=True)if __name__ == "__main__":    return User.query.get(int(user_id))    return User.query.get(int(user_id))
-
+    return User.query.get(int(user_id))
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
