@@ -20,6 +20,30 @@ Result: **fast, consistent, and error-free ordering**.
 
 ---
 
+## 📂 Project Structure
+
+| File / Folder        | Purpose                                                                 |
+|----------------------|-------------------------------------------------------------------------|
+| **base.html**        | Base template used by all other routes                                  |
+| **add_item.html**    | Add new items into the database                                         |
+| **add_supplier.html**| Add new suppliers into the database                                     |
+| **edit_supplier.html** | Edit supplier details                                                 |
+| **item_form.html**   | Modify supplier item details                                            |
+| **items_list.html**  | Display a list of all items for the user                                |
+| **order_form.html**  | Start a new order by selecting items                                    |
+| **order_preview.html** | Preview the WhatsApp order message before confirming                  |
+| **outlet_form.html** | Edit outlet details (name, address, notes)                              |
+| **supplier_form.html** | Add a new supplier                                                    |
+| **supplier_list.html** | Main page where users can view suppliers and start an order           |
+| **app.py**           | Configures routes and contains the main application logic               |
+| **config.py**        | Stores settings for SQLite and PostgreSQL, including secret keys and DB URLs |
+| **models.py**        | Defines database tables and ORM models                                  |
+| **requirements.txt** | Lists dependencies for pip to install                                   |
+| **migrations/**      | Tracks database migrations for PostgreSQL updates                       |
+| **.venv/**           | Virtual environment for this app with all required libraries installed  |
+| **app.js**           | Contains simple scripts for UI behavior                                 |
+| **style.css**        | Provides styling for the app                                            |
+
 ## 🛠️ Features (Planned)
 
 - [x] **Supplier Management**  
@@ -47,8 +71,9 @@ Result: **fast, consistent, and error-free ordering**.
   - Add CSV Import for easy supplier and items database update.
   - Add CSV Export for future Order History export for audit. 
 
-- [ ] **Order History** *(MVP+)*  
+- [x] **Order History** *(MVP+)*  
   Store and view past orders for auditing.  
+  > ℹ️ Added 29/8/25
 
 - [ ] **Multi-Outlet Support**  
   Manage multiple outlets within one system.  

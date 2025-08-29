@@ -6,15 +6,17 @@ from urllib.parse import quote_plus
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask.cli import with_appcontext
 from flask_migrate import Migrate
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 
 try:
     from .config import Config, ProdConfig
-    from .models import db, Supplier, Item, Outlet, Order, OrderItem  # Add Order, OrderItem
+    from .models import db, Supplier, Item, Outlet, Order, OrderItem, User
 except ImportError:
     from config import Config, ProdConfig
-    from models import db, Supplier, Item, Outlet, Order, OrderItem  # Add Order, OrderItem
+    from models import db, Supplier, Item, Outlet, Order, OrderItem, User
 
 migrate = Migrate()
+login_manager = LoginManager()
 
 def _digits_only(phone: str) -> str:
     # keep only digits for https://wa.me/
@@ -55,6 +57,8 @@ def create_app(config_class=Config):
     app.config.from_object(config_class)
     db.init_app(app)
     migrate.init_app(app, db)  # Change this line
+    login_manager.init_app(app)
+    login_manager.login_view = "login"
 
     # Allows initiating the db via $flask init-db
     @app.cli.command("init-db")
@@ -65,6 +69,7 @@ def create_app(config_class=Config):
 
     # ---- Suppliers (list + quick create) ----
     @app.get("/")
+    @login_required
     def suppliers_list():
         # Have a search bar(query) so if there are many more suppliers, we can filter them
         q = (request.args.get("q") or "").strip()
@@ -337,65 +342,6 @@ def create_app(config_class=Config):
             text=text,
         )
 
-    # Route to save order history
-    @app.post("/suppliers/<int:supplier_id>/order/save")
-    def save_order(supplier_id):
-        supplier = Supplier.query.get_or_404(supplier_id)
-        outlet_name = request.form.get("outlet_name", "").strip()
-        address = request.form.get("address", "").strip()
-        notes = request.form.get("notes", "").strip()
-        delivery_date_str = request.form.get("delivery_date", "")
-        
-        # Parse delivery date
-        delivery_date = None
-        if delivery_date_str:
-            try:
-                delivery_date = datetime.strptime(delivery_date_str, "%Y-%m-%d").date()
-            except ValueError:
-                pass
-        
-        # Create new order
-        order = Order(
-            supplier_id=supplier.id,
-            outlet_name=outlet_name,
-            address=address,
-            notes=notes,
-            delivery_date=delivery_date
-        )
-        db.session.add(order)
-        db.session.flush()  # To get the order ID
-        
-        # Save order items
-        total_items = 0
-        for key, val in request.form.items():
-            m = re.match(r"qty_(\d+)$", key)
-            if not m:
-                continue
-            try:
-                qty = float(val)
-            except (TypeError, ValueError):
-                qty = 0
-            if qty <= 0:
-                continue
-            
-            item_id = int(m.group(1))
-            item = Item.query.get(item_id)
-            if item and item.supplier_id == supplier.id:
-                order_item = OrderItem(
-                    order_id=order.id,
-                    item_name=item.name,
-                    unit=item.unit,
-                    quantity=qty
-                )
-                db.session.add(order_item)
-                total_items += 1
-        
-        order.total_items = total_items
-        db.session.commit()
-        
-        flash("Order saved to history!", "ok")
-        return redirect(url_for("order_history"))
-
     # Route to view order history
     @app.get("/orders")
     def order_history():
@@ -424,27 +370,43 @@ def create_app(config_class=Config):
             return redirect(url_for("outlet_setup"))
         return render_template("outlet_form.html", outlet=outlet)
 
-    @app.route("/suppliers/<int:supplier_id>/items/add", methods=["GET", "POST"])
-    def add_item(supplier_id):
-        supplier = Supplier.query.get_or_404(supplier_id)
+    @app.route("/login", methods=["GET", "POST"])
+    def login():
         if request.method == "POST":
-            name = request.form.get("name")
-            unit = request.form.get("unit")
-            default_qty = request.form.get("default_qty", type=float)
-            item_type = request.form.get("item_type")
-            item = Item(
-                name=name,
-                unit=unit,
-                default_qty=default_qty,
-                item_type=item_type,
-                supplier_id=supplier.id,
-                active=True
-            )
-            db.session.add(item)
+            email = request.form["email"]
+            password = request.form["password"]
+            user = User.query.filter_by(email=email).first()
+            if user and user.check_password(password):
+                login_user(user)
+                return redirect(url_for("suppliers_list"))
+            flash("Invalid email or password", "error")
+        return render_template("login.html")
+
+    @app.route("/logout")
+    @login_required
+    def logout():
+        logout_user()
+        return redirect(url_for("login"))
+
+    # Registration route
+    @app.route("/register", methods=["GET", "POST"])
+    def register():
+        if request.method == "POST":
+            email = request.form["email"].strip().lower()
+            password = request.form["password"]
+            # Check if user already exists
+            if User.query.filter_by(email=email).first():
+                flash("Email already registered.", "error")
+                return redirect(url_for("register"))
+            # Create new user
+            user = User(email=email)
+            user.set_password(password)
+            db.session.add(user)
             db.session.commit()
-            flash("Item added!", "ok")
-            return redirect(url_for("supplier_items", supplier_id=supplier.id))
-        return render_template("add_item.html", supplier=supplier)
+            login_user(user)
+            flash("Registration successful!", "ok")
+            return redirect(url_for("suppliers_list"))
+        return render_template("register.html")
 
     return app
 
@@ -454,6 +416,11 @@ if os.getenv("FLASK_ENV") == "production":
     app = create_app(ProdConfig)
 else:
     app = create_app(Config)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 
 if __name__ == "__main__":

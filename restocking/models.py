@@ -1,5 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from flask_login import UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
 
@@ -7,6 +9,7 @@ db = SQLAlchemy()
 class Supplier(db.Model):
     __tablename__ = "suppliers"
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), nullable=True)
     phone = db.Column(db.String(20), nullable=False)
@@ -18,6 +21,7 @@ class Supplier(db.Model):
 class Item(db.Model):
     __tablename__ = "items"
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     supplier_id = db.Column(db.Integer, db.ForeignKey("suppliers.id"), nullable=False)
     name = db.Column(db.String(160), nullable=False)
     unit = db.Column(db.String(32), nullable=False)  # kg, pkt, carton, tin
@@ -33,6 +37,7 @@ class Item(db.Model):
 class Outlet(db.Model):
     __tablename__ = "outlets"
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     name = db.Column(db.String(100), nullable=False)
     address = db.Column(db.String(200), nullable=False)
     notes = db.Column(db.Text, nullable=True)
@@ -41,6 +46,7 @@ class Outlet(db.Model):
 class Order(db.Model):
     __tablename__ = "orders"
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     supplier_id = db.Column(db.Integer, db.ForeignKey("suppliers.id"), nullable=False)
     outlet_name = db.Column(db.String(200), nullable=False)
     address = db.Column(db.Text)
@@ -60,6 +66,17 @@ class OrderItem(db.Model):
     item_name = db.Column(db.String(200), nullable=False)
     unit = db.Column(db.String(50), nullable=False)
     quantity = db.Column(db.Float, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     # Relationship
     order = db.relationship("Order", backref="order_items")
+
+class User(db.Model, UserMixin) :
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(128), nullable=False)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
